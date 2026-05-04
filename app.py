@@ -10,6 +10,7 @@ import tempfile as _tempfile
 import fitz  # PyMuPDF
 import PIL.Image
 import streamlit as st
+import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from processor import PDFProcessor
@@ -21,20 +22,49 @@ load_dotenv()
 # ---------------------------------------------------------------------------
 
 st.set_page_config(
-    page_title="PDF Transcriber & Translator",
+    page_title="Traduzir PDF Online Grátis | PDF Translator com IA",
     page_icon="📄",
     layout="wide",
+    menu_items={
+        "Get Help": "https://aistudio.google.com/apikey",
+        "About": "Ferramenta gratuita para transcrever e traduzir PDFs usando Inteligência Artificial (Google Gemini).",
+    },
 )
 
-st.title("📄 PDF Transcriber & Translator")
+# ── Microsoft Clarity analytics ──────────────────────────────────────────────
+components.html(
+    """
+    <script type="text/javascript">
+        (function(c,l,a,r,i,t,y){
+            c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+            t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+            y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+        })(window, document, "clarity", "script", "wky30b9qxr");
+    </script>
+    """,
+    height=0,
+    scrolling=False,
+)
 
-tab_transcribe, tab_remove = st.tabs(["🌐 Transcrever / Traduzir", "✂️ Remover Páginas"])
+# ── SEO meta tags ─────────────────────────────────────────────────────────────
+st.markdown(
+    """
+    <meta name="description" content="Traduza e transcreva qualquer PDF online grátis usando Inteligência Artificial. Funciona com PDFs escaneados, PDFs com texto, documentos em qualquer idioma. Powered by Google Gemini." />
+    <meta name="keywords" content="traduzir pdf online grátis, converter pdf para texto, transcrever pdf escaneado, tradução de pdf com ia, google gemini pdf, pdf translator, pdf transcriber" />
+    <meta property="og:title" content="Traduzir PDF Online Grátis | PDF Translator com IA" />
+    <meta property="og:description" content="Transcreva e traduza qualquer PDF — escaneado ou digital — usando Google Gemini AI. Gratuito, sem cadastro." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content="Traduzir PDF Online Grátis | PDF Translator com IA" />
+    <meta name="twitter:description" content="Transcreva e traduza qualquer PDF usando IA. Grátis, sem cadastro." />
+    """,
+    unsafe_allow_html=True,
+)
 
 # ---------------------------------------------------------------------------
 # Shared helpers
 # ---------------------------------------------------------------------------
 
-# Local: save cache on Desktop. Cloud (no Desktop): use system temp dir.
 _desktop = Path.home() / "Desktop"
 DESKTOP = _desktop if _desktop.exists() else Path(_tempfile.gettempdir())
 
@@ -69,6 +99,34 @@ def _is_cache_empty(page_num: int, filename: str, filesize: int) -> bool:
     return False
 
 
+# ---------------------------------------------------------------------------
+# Hero section
+# ---------------------------------------------------------------------------
+
+st.markdown(
+    """
+    <h1 style='text-align:center; margin-bottom:0'>📄 Traduzir PDF Online Grátis</h1>
+    <p style='text-align:center; color:#888; margin-top:4px; font-size:1.05rem'>
+        Transcreva e traduza qualquer PDF com Inteligência Artificial — escaneados ou digitais, em qualquer idioma.
+    </p>
+    """,
+    unsafe_allow_html=True,
+)
+
+col_f1, col_f2, col_f3, col_f4 = st.columns(4)
+with col_f1:
+    st.markdown("#### 🔍 PDFs Escaneados\nLê páginas digitalizadas como se fosse OCR, preservando a formatação original.")
+with col_f2:
+    st.markdown("#### 🌐 +10 Idiomas\nTraduz para Português, Inglês, Espanhol, Francês, Japonês e muito mais.")
+with col_f3:
+    st.markdown("#### ⚡ Processamento Paralelo\nVárias páginas ao mesmo tempo — documentos longos em minutos.")
+with col_f4:
+    st.markdown("#### 💾 Cache Automático\nInterrompeu? Retoma de onde parou, sem reprocessar páginas já concluídas.")
+
+st.markdown("---")
+
+tab_transcribe, tab_remove = st.tabs(["🌐 Transcrever / Traduzir", "✂️ Remover Páginas"])
+
 # ===========================================================================
 # TAB 1 — Transcrever / Traduzir
 # ===========================================================================
@@ -77,21 +135,50 @@ with tab_transcribe:
     with st.sidebar:
         st.header("⚙️ Configuração")
 
+        # ── API Key instructions ──────────────────────────────────────────
+        with st.expander("🔑 Como obter a chave da API (grátis)", expanded=False):
+            st.markdown(
+                """
+**Passo a passo:**
+
+1. Acesse **[aistudio.google.com/apikey](https://aistudio.google.com/apikey)**
+2. Faça login com sua conta Google
+3. Clique em **"Create API key"**
+4. Copie a chave gerada
+5. Cole no campo abaixo
+
+> A chave começa com `AIza...`
+> O plano gratuito já é suficiente para centenas de páginas.
+                """
+            )
+
         api_key = st.text_input(
             "Chave da API Gemini",
             type="password",
             value=os.getenv("GEMINI_API_KEY", ""),
+            placeholder="AIza...",
             help="Obtenha gratuitamente em aistudio.google.com/apikey",
         )
         if not api_key:
-            st.warning("Insira sua chave da API Gemini para continuar.")
+            st.warning("⬆️ Insira sua chave da API Gemini para começar.")
+        else:
+            st.success("✅ Chave configurada.")
+
+        st.markdown("---")
+
+        # ── Privacy / security note ───────────────────────────────────────
+        st.info(
+            "🔒 **Privacidade:** Seu PDF é processado temporariamente e enviado ao Google Gemini "
+            "para leitura. Não armazenamos seus arquivos nem sua chave de API.",
+            icon=None,
+        )
 
         st.markdown("---")
 
         model_name = st.text_input(
             "Modelo Gemini",
-            value="gemini-3.1-flash-lite-preview",
-            help="Modelos: gemini-3.1-flash-lite-preview · gemini-2.0-flash · gemini-2.0-flash-lite",
+            value="gemini-2.5-flash-preview-04-17",
+            help="Modelos disponíveis: gemini-2.5-flash-preview-04-17 · gemini-2.0-flash · gemini-2.0-flash-lite",
         )
 
         st.markdown("---")
@@ -124,7 +211,7 @@ with tab_transcribe:
             image_model = st.selectbox(
                 "Modelo de imagem",
                 ["gemini-3.1-flash-image-preview", "gemini-3.1-pro-image-preview"],
-                help="Flash: ~US$0,07/imagem · Pro: ~US$0,13/imagem (mais fiel ao original)",
+                help="Flash: ~US$0,07/imagem · Pro: ~US$0,13/imagem",
             )
             st.warning("⚠️ Custo extra: ~US$0,07 por imagem com Flash")
         else:
@@ -137,7 +224,12 @@ with tab_transcribe:
     # Upload + cache status
     # -----------------------------------------------------------------------
 
-    st.markdown("### Enviar PDF")
+    st.markdown("### 📤 Enviar PDF")
+    st.markdown(
+        "Suporta **PDFs escaneados** (imagens digitalizadas) e **PDFs com texto nativo** (gerados por computador). "
+        "Tamanho máximo: 500 MB."
+    )
+
     uploaded_file = st.file_uploader(
         "Arraste o PDF aqui ou clique para selecionar",
         type="pdf",
@@ -165,6 +257,9 @@ with tab_transcribe:
                     )
 
     can_process = bool(uploaded_file and api_key)
+
+    if not api_key and uploaded_file:
+        st.warning("👈 Insira sua chave da API Gemini na barra lateral para processar o PDF.")
 
     if st.button("🚀 Processar PDF", disabled=not can_process, type="primary", key="btn_process"):
 
@@ -236,13 +331,11 @@ with tab_transcribe:
                 status_line.write(f"✅ Todas as {total} páginas processadas.")
                 texts = [results.get(i + 1, "[Página não processada]") for i in range(total)]
 
-                # ── Post-processing: stitch broken sentences at page boundaries ──
                 st.write("🔗 Costurando frases partidas entre páginas…")
                 from processor import stitch_boundaries, clean_fake_footnotes
                 texts = stitch_boundaries(texts)
                 texts = [clean_fake_footnotes(t) for t in texts]
 
-                # ── Extract embedded images from the PDF ──────────────────────
                 st.write("🖼️ Extraindo imagens embutidas do PDF…")
                 native_images = processor.extract_native_images(tmp_path)
                 total_imgs = sum(len(v) for v in native_images.values())
@@ -250,9 +343,8 @@ with tab_transcribe:
                 if img_pages:
                     st.write(f"✅ {img_pages} página(s) com {total_imgs} imagem(ns) encontradas.")
                 else:
-                    st.write("ℹ️ Nenhuma imagem embutida encontrada (PDF escaneado ou sem imagens).")
+                    st.write("ℹ️ Nenhuma imagem embutida encontrada.")
 
-                # ── Translate image text (optional, parallel) ─────────────────
                 page_images: dict = {}
 
                 if native_images and translate_images and target_language:
@@ -287,11 +379,9 @@ with tab_transcribe:
                     st.write("✅ Imagens traduzidas.")
 
                 elif native_images:
-                    # Include images without translation
                     for page_num, imgs in native_images.items():
                         page_images[page_num] = [(img, None) for img in imgs]
 
-                # ── Generate output PDF ───────────────────────────────────────
                 st.write("📄 Gerando PDF de saída…")
                 try:
                     output_bytes = processor.create_pdf(texts, page_images)
@@ -324,7 +414,7 @@ with tab_remove:
     st.markdown("### ✂️ Visualizar e Remover Páginas")
     st.markdown(
         "Carregue um PDF, visualize todas as páginas em grade, marque as que quer remover "
-        "e gere um PDF limpo — **sem usar IA**."
+        "e gere um PDF limpo — **sem usar IA, sem custo**."
     )
 
     remove_file = st.file_uploader(
@@ -340,7 +430,6 @@ with tab_remove:
         sk_total  = f"rm_total_{file_id}"
         sk_data   = f"rm_data_{file_id}"
 
-        # ── Load & cache thumbnails (runs only once per file) ──────────────
         if sk_thumbs not in st.session_state:
             with st.spinner(f"Carregando {remove_file.name}…"):
                 raw = remove_file.read()
@@ -360,7 +449,6 @@ with tab_remove:
         native_texts = st.session_state[sk_texts]
         total        = st.session_state[sk_total]
 
-        # ── Controls bar ───────────────────────────────────────────────────
         st.markdown(f"**{total} páginas** encontradas.")
 
         ctrl1, ctrl2, ctrl3, ctrl4, ctrl5 = st.columns([2, 2, 2, 2, 2])
@@ -394,8 +482,6 @@ with tab_remove:
 
         st.markdown("---")
 
-        # ── Thumbnail grid ─────────────────────────────────────────────────
-        # Initialize default checkbox states (auto-detect empty on first load)
         for i in range(total):
             key = f"rm_{file_id}_{i}"
             if key not in st.session_state:
@@ -410,7 +496,6 @@ with tab_remove:
                 is_marked = st.session_state.get(key, False)
 
                 with cols[col_idx]:
-                    # Red tint overlay when marked — using container border trick
                     if is_marked:
                         st.markdown(
                             "<div style='border:3px solid #e74c3c; border-radius:6px; padding:2px;'>",
@@ -422,13 +507,11 @@ with tab_remove:
                     if is_marked:
                         st.markdown("</div>", unsafe_allow_html=True)
 
-                    # Checkbox — label shows page number + deletion status
                     label = f"🗑️ **Pág. {page_idx + 1}**" if is_marked else f"Pág. {page_idx + 1}"
                     st.checkbox(label, key=key)
 
         st.markdown("---")
 
-        # ── Generate clean PDF ─────────────────────────────────────────────
         pages_to_remove = [i for i in range(total) if st.session_state.get(f"rm_{file_id}_{i}", False)]
 
         if pages_to_remove:
