@@ -10,7 +10,6 @@ import tempfile as _tempfile
 import fitz
 import PIL.Image
 import streamlit as st
-import streamlit.components.v1 as components
 from dotenv import load_dotenv
 
 from processor import PDFProcessor
@@ -31,8 +30,8 @@ st.set_page_config(
     },
 )
 
-# ── Microsoft Clarity + currency detection (single injection) ────────────────
-components.html(
+# ── Microsoft Clarity + currency detection ───────────────────────────────────
+st.markdown(
     """
     <script type="text/javascript">
         (function(c,l,a,r,i,t,y){
@@ -56,17 +55,16 @@ components.html(
                 'CO':'COP','CL':'CLP','PE':'PEN'
             };
             var currency = map[region] || 'USD';
-            var url = new URL(window.parent.location.href);
+            var url = new URL(window.location.href);
             if (!url.searchParams.has('cur')) {
                 url.searchParams.set('cur', currency);
-                window.parent.history.replaceState({}, '', url.toString());
+                window.history.replaceState({}, '', url.toString());
             }
         } catch(e) {}
     })();
     </script>
     """,
-    height=0,
-    scrolling=False,
+    unsafe_allow_html=True,
 )
 
 # ── SEO meta tags ─────────────────────────────────────────────────────────────
