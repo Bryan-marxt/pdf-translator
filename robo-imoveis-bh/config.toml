@@ -1,0 +1,90 @@
+# ============================================================
+#  Robô de Imóveis BH — configuração
+#  Edite à vontade. O robô relê este arquivo a cada varredura.
+# ============================================================
+
+[busca]
+# Valores em R$ por mês
+aluguel_min = 1500
+aluguel_max = 6500          # só o aluguel
+custo_total_max = 8000      # aluguel + condomínio + IPTU (quando o anúncio informa)
+
+quartos_min = 3             # abaixo disso o imóvel é descartado
+banheiros_min = 1           # mínimo aceito (2+ ganha pontos)
+area_min = 80               # m² — abaixo disso é "apertado" demais
+exigir_varanda = true       # sem varanda/sacada/terraço = descartado
+
+# apartamento | cobertura | casa | casa_condominio
+tipos = ["apartamento", "cobertura", "casa", "casa_condominio"]
+
+# Bairros favoritos ganham mais pontos.
+bairros_favoritos = [
+  "Ouro Preto", "Pampulha", "Trevo", "Cidade Nova",
+  "Santa Amélia", "Santa Mônica",
+]
+
+# Bairros aceitos (região da Pampulha, Venda Nova próxima e Nordeste).
+# Imóveis em bairros fora das duas listas são descartados.
+bairros_aceitos = [
+  "São Luiz", "São José", "Bandeirantes", "Castelo", "Itapoã", "Jaraguá",
+  "Liberdade", "Santa Rosa", "Dona Clara", "Aeroporto", "Jardim Atlântico",
+  "Santa Branca", "Indaiá", "Garças", "Braúnas", "Planalto", "Itatiaia",
+  "Paquetá", "Engenho Nogueira", "Copacabana", "Manacás", "Alípio de Melo",
+  "Vila Clóris", "Xangri-lá", "Parque Xangri-lá",
+  "União", "Silveira", "Palmares", "Fernão Dias", "Ipiranga",
+  "Nova Floresta", "Sagrada Família", "Jardim Leblon", "Jardim Guanabara",
+  "São Tomaz", "Santa Terezinha", "São Francisco", "Céu Azul", "Alto Caiçaras",
+  "Heliópolis", "Helena Antipoff",
+]
+
+[robo]
+intervalo_minutos = 30            # de quanto em quanto tempo varrer os sites
+pausa_entre_requisicoes = 4       # segundos entre uma página e outra (seja educado com os sites)
+dias_para_fora_do_ar = 4          # sem aparecer há X dias = anúncio provavelmente saiu
+porta = 8000                      # painel em http://localhost:8000
+
+[fontes.quintoandar]
+ativo = true
+# Cada busca do QuintoAndar já inclui os bairros vizinhos.
+regioes = [
+  "pampulha", "ouro-preto", "cidade-nova", "trevo", "santa-amelia",
+  "santa-monica", "sao-luiz", "bandeirantes", "itapoa", "jaragua",
+  "castelo", "santa-rosa", "liberdade", "uniao", "dona-clara", "planalto",
+]
+tipos = ["apartamento", "casa", "casacondominio"]
+
+[fontes.chavesnamao]
+ativo = true
+# Slugs de bairro como aparecem na URL do site
+bairros = [
+  "ouro-preto", "pampulha", "trevo", "cidade-nova", "santa-amelia",
+  "santa-monica", "sao-luiz", "sao-jose", "bandeirantes", "castelo",
+  "itapoa", "jaragua", "liberdade", "santa-rosa", "dona-clara",
+  "aeroporto", "santa-branca", "indaia", "planalto", "uniao", "silveira",
+]
+tipos = ["apartamentos", "coberturas", "casas", "casas-em-condominio"]
+detalhes_por_ciclo = 40           # páginas de detalhe (descrição, varanda...) por varredura
+
+[ia]
+# Avaliação das FOTOS por IA (beleza, modernidade, sensação de espaço).
+# Precisa da variável de ambiente ANTHROPIC_API_KEY. Sem ela, o robô funciona igual, só sem nota de IA.
+ativo = true
+modelo = "claude-opus-5-5"
+max_avaliacoes_por_ciclo = 15     # limita o gasto por varredura
+fotos_por_imovel = 6
+gosto = """
+Procuro imóvel para alugar em BH (apartamento — de preferência cobertura — ou casa).
+Não pode ser feio: prefiro acabamento moderno (porcelanato, cozinha planejada, iluminação embutida,
+esquadrias grandes, pintura clara, banheiros atualizados). Varanda é indispensável.
+Não gosto de me sentir sufocado: quero ambientes amplos, pé-direito bom, muita luz natural,
+janelas grandes, vista livre, nada de corredor escuro ou cômodos apertados.
+Referências que eu gostei: casas de 3 quartos, 120–130 m², com garagem, no Trevo,
+Santa Mônica e Santa Amélia, na faixa de R$ 4.500–4.900.
+"""
+
+[telegram]
+# Avisos no celular. Crie um bot com o @BotFather e defina as variáveis de ambiente
+# TELEGRAM_TOKEN e TELEGRAM_CHAT_ID (veja o README).
+ativo = false
+nota_minima = 65                  # só avisa imóveis com nota a partir disso
+avisar_queda_preco = true

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radar de Imóveis BH</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<header class="topo">
+  <div class="marca">
+    <span class="logo">🏠</span>
+    <div>
+      <h1>Radar de Imóveis BH</h1>
+      <p class="sub">Pampulha · Ouro Preto · Trevo · Cidade Nova e região</p>
+    </div>
+  </div>
+  <div class="status-box">
+    <span id="status" class="status">carregando…</span>
+    <button id="btn-varrer" class="btn">Varrer agora</button>
+  </div>
+</header>
+
+<section class="numeros" id="numeros"></section>
+
+<section class="filtros">
+  <input id="f-texto" type="search" placeholder="Buscar (bairro, rua, 'piscina', 'gourmet'…)">
+  <div class="chips" id="f-tipo">
+    <button data-v="" class="chip ativo">Todos</button>
+    <button data-v="cobertura" class="chip">Cobertura</button>
+    <button data-v="apartamento" class="chip">Apartamento</button>
+    <button data-v="casa" class="chip">Casa</button>
+    <button data-v="casa_condominio" class="chip">Casa em condomínio</button>
+  </div>
+  <select id="f-bairro"><option value="">Todos os bairros</option></select>
+  <label class="campo">Até R$ <input id="f-preco" type="number" step="100" min="0" placeholder="aluguel"></label>
+  <select id="f-ordem">
+    <option value="nota">Melhor nota</option>
+    <option value="recente">Mais recentes</option>
+    <option value="preco">Menor aluguel</option>
+    <option value="area">Maior área</option>
+  </select>
+  <label class="toggle"><input type="checkbox" id="f-fav"> Só favoritos</label>
+  <label class="toggle"><input type="checkbox" id="f-fora"> Mostrar fora do perfil</label>
+  <label class="toggle"><input type="checkbox" id="f-desc"> Mostrar descartados</label>
+</section>
+
+<main>
+  <p id="contagem" class="contagem"></p>
+  <div id="grade" class="grade"></div>
+  <p id="vazio" class="vazio" hidden>Nenhum imóvel com esses filtros ainda. O robô continua procurando 👀</p>
+</main>
+
+<dialog id="modal"><div id="modal-corpo"></div></dialog>
+<div id="toast" class="toast" hidden></div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>
