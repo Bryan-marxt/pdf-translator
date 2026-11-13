@@ -74,11 +74,24 @@ max_avaliacoes_por_ciclo = 15     # limita o gasto por varredura
 fotos_por_imovel = 6
 gosto = """
 Procuro imóvel para alugar em BH (apartamento — de preferência cobertura — ou casa).
-Não pode ser feio: prefiro acabamento moderno (porcelanato, cozinha planejada, iluminação embutida,
-esquadrias grandes, pintura clara, banheiros atualizados). Varanda é indispensável.
-Não gosto de me sentir sufocado: quero ambientes amplos, pé-direito bom, muita luz natural,
-janelas grandes, vista livre, nada de corredor escuro ou cômodos apertados.
-Referências que eu gostei: casas de 3 quartos, 120–130 m², com garagem, no Trevo,
+Varanda é indispensável.
+
+Padrão de acabamento que eu amo (veja as fotos da pasta referencias/):
+- porcelanato branco tipo mármore, polido, em peças grandes, no chão todo;
+- gesso rebaixado/sanca com spots de LED embutidos, lustres modernos;
+- paredes claras (branco, off-white), painel de TV suspenso, revestimento 3D;
+- cozinha planejada: armários brancos, bancada de granito preto, armários de vidro com fita de LED,
+  ilha ou balcão americano;
+- armários embutidos nos quartos (portas de correr brancas);
+- escada com corrimão de inox/vidro (sobrado é bem-vindo);
+- área externa/gourmet com churrasqueira, revestimento de pedra filete, guarda-corpo de vidro.
+Resumindo: imóvel novo ou recém-reformado, clean, claro, brilhante, com cara de "pronto pra morar".
+
+Não gosto: piso de taco/cerâmica antiga, azulejo datado, armário velho de madeira escura,
+ambiente escuro, teto baixo, cômodos apertados, corredor estreito. Não gosto de me sentir sufocado:
+quero ambientes amplos, muita luz natural, janelas grandes.
+
+Referências de anúncio: casas de 3 quartos, 120–130 m², com garagem, no Trevo,
 Santa Mônica e Santa Amélia, na faixa de R$ 4.500–4.900.
 """
 

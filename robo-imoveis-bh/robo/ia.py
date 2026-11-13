@@ -5,6 +5,7 @@ Só roda se houver credencial da API da Anthropic (ANTHROPIC_API_KEY ou `ant aut
 import base64
 import json
 import logging
+from pathlib import Path
 
 from .util import Navegador
 
@@ -50,10 +51,34 @@ def _tipo_imagem(dados: bytes) -> str | None:
     return None
 
 
+PASTA_REFERENCIAS = Path(__file__).resolve().parent.parent / "referencias"
+
+
+def _referencias(maximo: int = 10) -> list[dict]:
+    """Fotos de imóveis que a pessoa AMOU (pasta referencias/). Vão no início da mensagem, em cache."""
+    blocos = []
+    if not PASTA_REFERENCIAS.is_dir():
+        return blocos
+    arquivos = sorted(p for p in PASTA_REFERENCIAS.iterdir() if p.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp"))
+    for p in arquivos[:maximo]:
+        dados = p.read_bytes()
+        mt = _tipo_imagem(dados)
+        if mt:
+            blocos.append({"type": "image", "source": {
+                "type": "base64", "media_type": mt, "data": base64.standard_b64encode(dados).decode()}})
+    if blocos:
+        blocos.insert(0, {"type": "text", "text":
+            "REFERÊNCIA DE GOSTO — estas fotos são de um imóvel que a pessoa adorou. "
+            "Use como régua do padrão de acabamento e da sensação de espaço/luz que ela quer:"})
+        blocos[-1]["cache_control"] = {"type": "ephemeral"}  # reaproveita entre avaliações
+    return blocos
+
+
 class AvaliadorIA:
     def __init__(self, cfg: dict):
         self.cfg = cfg.get("ia", {})
         self.cliente = None
+        self.referencias = _referencias()
         if not self.cfg.get("ativo", True):
             return
         try:
@@ -71,6 +96,10 @@ class AvaliadorIA:
     def avaliar(self, im: dict, nav: Navegador) -> dict | None:
         fotos = (im.get("fotos") or [])[: self.cfg.get("fotos_por_imovel", 6)]
         conteudo = []
+        n_fotos = 0
+        if self.referencias:
+            conteudo.extend(self.referencias)
+            conteudo.append({"type": "text", "text": "AGORA, O IMÓVEL A AVALIAR — fotos do anúncio:"})
         for url in fotos:
             dados = nav.get(url, binario=True)
             if not dados or len(dados) > 4_500_000:
@@ -78,9 +107,10 @@ class AvaliadorIA:
             mt = _tipo_imagem(dados)
             if not mt:
                 continue
+            n_fotos += 1
             conteudo.append({"type": "image", "source": {
                 "type": "base64", "media_type": mt, "data": base64.standard_b64encode(dados).decode()}})
-        if not conteudo:
+        if n_fotos == 0:
             return None
 
         dados_txt = (
@@ -127,5 +157,5 @@ class AvaliadorIA:
             resultado = json.loads(texto)
         except ValueError:
             return None
-        resultado["fotos_avaliadas"] = len(conteudo) - 1
+        resultado["fotos_avaliadas"] = n_fotos
         return resultado

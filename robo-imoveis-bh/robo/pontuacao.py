@@ -6,13 +6,15 @@ from .util import normalizar
 MODERNO = re.compile(
     r"moderno|moderna|reformad|novo|nova|rec[eé]m|porcelanato|planejad|gourmet|conceito aberto|"
     r"integrad|ilumina[cç][aã]o embutida|gesso|sanca|lavabo|ar[- ]condicionado|automa[cç]|"
-    r"blindex|vidro|piscina|alto padr[aã]o|acabamento", re.I)
+    r"blindex|vidro|piscina|alto padr[aã]o|acabamento|spots?|\bled\b|granito|churrasqueira|inox|"
+    r"arm[aá]rios? embutid|closet|revestimento 3d|filete|sobrado|duplex|lustre", re.I)
 AREJADO = re.compile(
     r"amplo|ampla|espa[cç]os|arejad|ventilad|iluminad|claro|clara|luz natural|vista|"
     r"p[eé][- ]direito|janel[aã]o|janelas grandes|sol da manh|quintal|jardim|[aá]rea externa|terra[cç]o|livre", re.I)
 NEGATIVO = re.compile(
     r"precisa de reforma|necessita reforma|antigo|antiga|fundos|sem janela|apertad|escur|"
-    r"subsolo|semi[- ]?subsolo|barrac[aã]o|cômodo|comodo|kitnet|conjugad|aceito proposta para reforma", re.I)
+    r"subsolo|semi[- ]?subsolo|barrac[aã]o|cômodo|comodo|kitnet|conjugad|aceito proposta para reforma|"
+    r"\btaco\b|piso cer[aâ]mico antigo", re.I)
 
 
 def _bairro_status(bairro: str, cfg_busca: dict) -> str:

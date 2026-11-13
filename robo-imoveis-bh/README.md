@@ -51,6 +51,10 @@ No Windows, também dá para clicar duas vezes em **`iniciar.bat`**.
    - Mac/Linux: `export ANTHROPIC_API_KEY="sk-ant-..."`
 3. Rode `python run.py` normalmente.
 
+**Fotos de referência:** a pasta `referencias/` tem fotos de um imóvel que você adorou. A IA usa essas
+fotos como régua do seu padrão em toda avaliação. Pode trocar ou adicionar fotos à vontade (até 10,
+JPG ou PNG). Elas ficam em cache na API, então não encarecem cada avaliação.
+
 O custo é baixo: são no máximo 15 imóveis avaliados por varredura (`max_avaliacoes_por_ciclo`), e
 cada imóvel é avaliado uma única vez. O modelo usado fica em `[ia] modelo` no `config.toml`.
 Sem a chave, tudo funciona igual, só sem a nota das fotos.
