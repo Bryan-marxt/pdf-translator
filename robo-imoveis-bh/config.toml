@@ -63,7 +63,7 @@ bairros = [
   "aeroporto", "santa-branca", "indaia", "planalto", "uniao", "silveira",
 ]
 tipos = ["apartamentos", "coberturas", "casas", "casas-em-condominio"]
-detalhes_por_ciclo = 40           # páginas de detalhe (descrição, varanda...) por varredura
+detalhes_por_ciclo = 80           # páginas de detalhe (descrição, varanda...) por varredura
 
 [ia]
 # Avaliação das FOTOS por IA (beleza, modernidade, sensação de espaço).

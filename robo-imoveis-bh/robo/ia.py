@@ -5,6 +5,7 @@ Só roda se houver credencial da API da Anthropic (ANTHROPIC_API_KEY ou `ant aut
 import base64
 import json
 import logging
+import os
 from pathlib import Path
 
 from .util import Navegador
@@ -81,11 +82,15 @@ class AvaliadorIA:
         self.referencias = _referencias()
         if not self.cfg.get("ativo", True):
             return
+        if not (os.environ.get("ANTHROPIC_API_KEY") or os.environ.get("ANTHROPIC_AUTH_TOKEN")
+                or os.environ.get("ANTHROPIC_PROFILE") or Path.home().joinpath(".config", "anthropic").is_dir()):
+            log.info("IA desligada: defina ANTHROPIC_API_KEY para ativar a avaliação das fotos.")
+            return
         try:
             import anthropic
             self._anthropic = anthropic
             self.cliente = anthropic.Anthropic()
-        except Exception as e:  # sem SDK ou sem credencial
+        except Exception as e:  # sem SDK ou credencial inválida
             log.info("IA desligada (%s). Defina ANTHROPIC_API_KEY para ativar.", e)
             self.cliente = None
 
@@ -145,6 +150,10 @@ class AvaliadorIA:
             return None
         except self._anthropic.APIConnectionError as e:
             log.warning("Sem conexão com a API: %s", e)
+            return None
+        except TypeError as e:  # SDK sem credencial resolvível
+            log.error("IA desligada — credencial da API não encontrada (%s)", e)
+            self.cliente = None
             return None
 
         if resp.stop_reason == "refusal":

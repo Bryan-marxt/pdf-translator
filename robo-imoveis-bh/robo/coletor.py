@@ -96,7 +96,12 @@ def varrer(con) -> dict:
                 if im["passa"] and not im["ia_em"] and not im["duplicado_de"] and not im["descartado"]]
         fila.sort(key=lambda x: -x["nota"])
         for im in fila[: cfg["ia"].get("max_avaliacoes_por_ciclo", 15)]:
-            res = avaliador.avaliar(im, nav)
+            try:
+                res = avaliador.avaliar(im, nav)
+            except Exception:
+                log.exception("Erro na avaliação de IA de %s", im["url"])
+                erros += 1
+                res = None
             if res:
                 db.atualizar(con, im["id"], ia=res, ia_em=db.agora())
                 avaliados += 1
@@ -114,8 +119,9 @@ def varrer(con) -> dict:
                   if im["passa"] and not im["notificado"] and not im["duplicado_de"] and not im["descartado"]]
     if primeira_vez:
         bons = sum(1 for im in candidatos if im["nota"] >= tg.get("nota_minima", 65))
-        for im in candidatos:
-            db.atualizar(con, im["id"], notificado=1)
+        with db._lock:  # o primeiro lote não conta como "novo"
+            con.execute("UPDATE imoveis SET notificado=1, visto=1")
+            con.commit()
         notificar.enviar_texto(cfg, f"🤖 Robô de imóveis ligado! Encontrei {len(candidatos)} imóveis dentro do perfil "
                                     f"({bons} com nota ≥ {tg.get('nota_minima', 65)}). A partir de agora aviso só os novos.")
     else:

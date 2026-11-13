@@ -105,7 +105,7 @@ dialog::backdrop { background: rgba(0,0,0,.6); }
 .barra { height: 8px; background: var(--fundo); border-radius: 4px; overflow: hidden; }
 .barra i { display: block; height: 100%; background: var(--primaria); }
 .colunas { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-@media (max-width: 640px) { .colunas { grid-template-columns: 1fr; } .barras { grid-template-columns: 110px 1fr 30px; }
+@media (max-width: 640px) { .topo { position: static; } .colunas { grid-template-columns: 1fr; } .barras { grid-template-columns: 110px 1fr 30px; }
   .topo, .filtros, main, .numeros { padding-left: 16px; padding-right: 16px; } .m-galeria img { height: 240px; } }
 .m-corpo h3 { margin: 0 0 6px; font-size: 14px; text-transform: uppercase; letter-spacing: .05em; color: var(--suave); }
 .m-corpo ul { margin: 0; padding-left: 18px; }

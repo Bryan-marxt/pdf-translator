@@ -14,7 +14,7 @@ AREJADO = re.compile(
 NEGATIVO = re.compile(
     r"precisa de reforma|necessita reforma|antigo|antiga|fundos|sem janela|apertad|escur|"
     r"subsolo|semi[- ]?subsolo|barrac[aã]o|cômodo|comodo|kitnet|conjugad|aceito proposta para reforma|"
-    r"\btaco\b|piso cer[aâ]mico antigo", re.I)
+    r"\btaco\b|piso cer[aâ]mico antigo|piso (em |de )?cer[aâ]mica|cer[aâ]mica nos quartos", re.I)
 
 
 def _bairro_status(bairro: str, cfg_busca: dict) -> str:
@@ -86,9 +86,9 @@ def avaliar(im: dict, cfg: dict) -> tuple[bool, int, list[str]]:
     texto = " ".join([im.get("titulo") or "", im.get("descricao") or "", " ".join(im.get("amenidades") or [])])
 
     if tipo == "cobertura":
-        pts += 15; motivos.append("✓ cobertura")
+        pts += 12; motivos.append("✓ cobertura")
     elif tipo in ("casa", "casa_condominio"):
-        pts += 6
+        pts += 9
     if tipo == "casa_condominio":
         pts += 3; motivos.append("✓ condomínio fechado")
 
@@ -137,6 +137,8 @@ def avaliar(im: dict, cfg: dict) -> tuple[bool, int, list[str]]:
         if ia.get("nota_geral", 10) < 4:
             motivos.append("✗ IA achou o imóvel feio/apertado")
     else:
-        nota = nota_regras
+        # Sem olhar as fotos não dá pra ter certeza de que é bonito: a nota fica limitada a ~80.
+        nota = nota_regras * 0.8
+        motivos.append("? sem avaliação das fotos (nota limitada)")
 
     return (not reprovado), int(round(nota)), motivos
