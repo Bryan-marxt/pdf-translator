@@ -48,7 +48,7 @@ function filtrar() {
     if (filtro.fav && !im.favorito) return false;
     if (filtro.tipo && im.tipo !== filtro.tipo) return false;
     if (filtro.bairro && im.bairro !== filtro.bairro) return false;
-    if (filtro.preco && im.aluguel > +filtro.preco) return false;
+    if (filtro.preco && (im.custo_mensal || im.aluguel) > +filtro.preco) return false;
     if (filtro.rapido === "novos" && !ehNovo(im)) return false;
     if (filtro.rapido === "baixou" && !baixou(im)) return false;
     if (t) {
@@ -60,7 +60,7 @@ function filtrar() {
   const ord = {
     nota: (a, b) => b.nota - a.nota,
     recente: (a, b) => (b.primeiro_visto || "").localeCompare(a.primeiro_visto || ""),
-    preco: (a, b) => (a.aluguel || 1e9) - (b.aluguel || 1e9),
+    preco: (a, b) => (a.custo_mensal || a.aluguel || 1e9) - (b.custo_mensal || b.aluguel || 1e9),
     area: (a, b) => (b.area || 0) - (a.area || 0),
   }[filtro.ordem];
   return l.sort(ord);
@@ -91,7 +91,7 @@ function card(im) {
   ].filter(Boolean).join("");
   const motivos = (im.motivos || []).filter((m) => !m.startsWith("★")).slice(0, 4)
     .map((m) => `<span class="${m.startsWith("✗") ? "mau" : ""}">${esc(m.slice(2))}</span>`).join("");
-  const total = im.custo_total && im.custo_total !== im.aluguel ? `<small> · total ${brl(im.custo_total)}</small>` : "";
+  const total = im.custo_mensal && im.custo_mensal !== im.aluguel ? `<small> · ${brl(im.custo_mensal)}/mês com tudo</small>` : "";
   const ant = im.aluguel_anterior && im.aluguel_anterior !== im.aluguel ? `<s>${brl(im.aluguel_anterior)}</s>` : "";
   return `
   <article class="card ${im.passa ? "" : "fora"} ${im.descartado ? "descartado" : ""}" data-id="${esc(im.id)}">
@@ -141,7 +141,7 @@ async function abrir(id) {
         <div>
           <div class="tipo">${TIPOS[im.tipo] || im.tipo} · ${esc(im.bairro)}${im.endereco ? " · " + esc(im.endereco) : ""}</div>
           <h2>${esc(im.titulo)}</h2>
-          <div class="preco">${brl(im.aluguel)} <small>aluguel · cond+IPTU ${brl(im.condominio_iptu)} · total ${brl(im.custo_total)}</small></div>
+          <div class="preco">${brl(im.aluguel)} <small>aluguel · cond+IPTU ${brl(im.condominio_iptu)} · ${brl(im.custo_mensal)}/mês com tudo${im.fonte === "quintoandar" ? " (taxas do QuintoAndar, sem fiança)" : " (inclui seguro fiança ≈10% e seguro incêndio estimado)"}</small></div>
           <div class="specs"><span>📐 ${im.area || "?"} m²</span><span>🛏 ${im.quartos ?? "?"} quartos</span><span>🚿 ${im.banheiros ?? "?"} banheiros</span><span>🚗 ${im.vagas ?? 0} vagas</span></div>
         </div>
         <div class="nota" style="position:static;background:${corNota(im.nota)}">${im.nota}</div>

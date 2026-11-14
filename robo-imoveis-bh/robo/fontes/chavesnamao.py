@@ -109,7 +109,33 @@ def coletar(cfg: dict, nav: Navegador):
                     yield imovel
 
 
-def detalhar(url: str, nav: Navegador) -> dict | None:
+def _texto_visivel(html: str) -> str:
+    t = re.sub(r"<script.*?</script>", " ", html, flags=re.S)
+    t = re.sub(r"<[^>]+>", " ", t)
+    t = re.sub(r"\$R[SC]\([^)]*\)", " ", t)  # marcadores de streaming do Next.js
+    return re.sub(r"\s+", " ", t)
+
+
+def _reais(rx: str, texto: str) -> int | None:
+    m = re.search(rx, texto)
+    if not m:
+        return None
+    digitos = re.sub(r"[^\d,]", "", m.group(1)).split(",")[0]
+    return int(digitos) if digitos else None  # "R$ --" ou "R$ -" = não informado
+
+
+def custos_visiveis(html: str, aluguel: int | None) -> dict:
+    """Condomínio e IPTU como aparecem no topo da página ('Condomínio R$ 380/mês', 'IPTU R$ --')."""
+    t = _texto_visivel(html)
+    soma = _reais(r"Aluguel \+ Condom[ií]nio\s+R\$\s*([\d.,-]+)", t)
+    cond = (soma - aluguel) if (soma and aluguel) else _reais(r"(?<!\+ )Condom[ií]nio\s+R\$\s*([\d.,-]+)", t)
+    iptu = _reais(r"IPTU\s+R\$\s*([\d.,-]+)", t)
+    if iptu and aluguel and iptu > aluguel * 0.25:  # valor anual informado no campo mensal
+        iptu = round(iptu / 12)
+    return {"condominio": cond, "iptu": iptu}
+
+
+def detalhar(url: str, nav: Navegador, aluguel: int | None = None) -> dict | None:
     """Abre a página do anúncio e devolve os campos extras."""
     html = nav.get(url)
     if not html:
@@ -127,6 +153,9 @@ def detalhar(url: str, nav: Navegador) -> dict | None:
             cond = re.search(r"Condom[ií]nio:\s*R\$\s*([\d.]+)", descricao)
             iptu = re.search(r"IPTU:\s*R\$\s*([\d.]+)", descricao)
             cond_iptu = (para_int(cond.group(1)) if cond else 0) + (para_int(iptu.group(1)) if iptu else 0)
+            vis = custos_visiveis(html, aluguel)
+            if not cond_iptu and (vis["condominio"] is not None or vis["iptu"] is not None):
+                cond_iptu = (vis["condominio"] or 0) + (vis["iptu"] or 0)
             vagas = re.search(r"(\d+)\s+garage", resumo)
             ref = re.search(r"ref:? do im[oó]vel:?\s*([\w-]+)", resumo)
             extra = {
@@ -137,6 +166,7 @@ def detalhar(url: str, nav: Navegador) -> dict | None:
                 "banheiros": para_int(item.get("numberOfBathroomsTotal")),
                 "vagas": para_int(vagas.group(1)) if vagas else None,
                 "condominio_iptu": cond_iptu or None,
+                "custos": vis,
                 "titulo": sobre.get("name"),
             }
             if ref and "QUINTOANDAR" in resumo.upper():

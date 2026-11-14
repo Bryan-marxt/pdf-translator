@@ -75,7 +75,7 @@ def varrer(con) -> dict:
         pendentes.sort(key=lambda x: -x["nota"])
         for im in pendentes[: cfg["fontes"]["chavesnamao"].get("detalhes_por_ciclo", 40)]:
             try:
-                extra = chavesnamao.detalhar(im["url"], nav)
+                extra = chavesnamao.detalhar(im["url"], nav, im.get("aluguel"))
             except Exception:
                 log.exception("Erro no detalhe %s", im["url"])
                 extra = None

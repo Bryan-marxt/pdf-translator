@@ -16,7 +16,7 @@ CAMPOS_FONTE = [
     "suites", "vagas", "varanda", "amenidades", "descricao", "fotos", "lat", "lng",
     "ref_externa",
 ]
-CAMPOS_JSON = {"amenidades", "fotos", "motivos", "ia"}
+CAMPOS_JSON = {"amenidades", "fotos", "motivos", "ia", "custos"}
 
 ESQUEMA = """
 CREATE TABLE IF NOT EXISTS imoveis (
@@ -25,7 +25,7 @@ CREATE TABLE IF NOT EXISTS imoveis (
     aluguel INTEGER, condominio_iptu INTEGER, custo_total INTEGER, area INTEGER,
     quartos INTEGER, banheiros INTEGER, suites INTEGER, vagas INTEGER,
     varanda INTEGER, amenidades TEXT, descricao TEXT, fotos TEXT, lat REAL, lng REAL,
-    ref_externa TEXT, duplicado_de TEXT,
+    ref_externa TEXT, duplicado_de TEXT, custos TEXT,
     detalhe_ok INTEGER DEFAULT 0,
     primeiro_visto TEXT, ultimo_visto TEXT, ativo INTEGER DEFAULT 1,
     aluguel_anterior INTEGER, preco_mudou_em TEXT,
@@ -56,6 +56,10 @@ def conectar() -> sqlite3.Connection:
     con.row_factory = sqlite3.Row
     con.execute("PRAGMA journal_mode=WAL")
     con.executescript(ESQUEMA)
+    try:  # bancos criados antes da coluna 'custos'
+        con.execute("ALTER TABLE imoveis ADD COLUMN custos TEXT")
+    except sqlite3.OperationalError:
+        pass
     return con
 
 

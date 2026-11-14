@@ -3,7 +3,7 @@ from pathlib import Path
 
 from flask import Flask, abort, jsonify, request, send_from_directory
 
-from . import coletor, config, db
+from . import coletor, config, db, pontuacao
 
 ESTATICO = Path(__file__).parent / "static"
 app = Flask(__name__, static_folder=None)
@@ -35,11 +35,13 @@ def listar():
     con = _con()
     try:
         itens = []
+        cfg = config.carregar()
         for im in db.todos(con):
             if im.get("duplicado_de"):
                 continue
             d = {k: im.get(k) for k in CAMPOS_LISTA}
             d["fotos"] = (im.get("fotos") or [])[:8]
+            d["custo_mensal"] = pontuacao.custo_mensal(im, cfg)
             itens.append(d)
         return jsonify(itens)
     finally:
@@ -54,6 +56,7 @@ def detalhe(iid):
         if not im:
             abort(404)
         im["historico"] = db.historico(con, iid)
+        im["custo_mensal"] = pontuacao.custo_mensal(im, config.carregar())
         return jsonify(im)
     finally:
         con.close()

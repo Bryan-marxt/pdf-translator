@@ -7,7 +7,7 @@
 # Valores em R$ por mês
 aluguel_min = 1500
 aluguel_max = 6500          # só o aluguel
-custo_total_max = 8000      # aluguel + condomínio + IPTU (quando o anúncio informa)
+custo_total_max = 8000      # por mês com tudo: aluguel + condomínio + IPTU + seguros + taxas
 
 quartos_min = 3             # abaixo disso o imóvel é descartado
 banheiros_min = 1           # mínimo aceito (2+ ganha pontos)
@@ -36,6 +36,10 @@ bairros_aceitos = [
   "São Tomaz", "Santa Terezinha", "São Francisco", "Céu Azul", "Alto Caiçaras",
   "Heliópolis", "Helena Antipoff",
 ]
+
+[custos]
+seguro_fianca_pct = 10            # imobiliárias: seguro fiança ≈ 10% do aluguel (QuintoAndar não cobra)
+seguro_incendio_estimado = 50     # R$/mês, quando o anúncio não informa
 
 [robo]
 intervalo_minutos = 30            # de quanto em quanto tempo varrer os sites

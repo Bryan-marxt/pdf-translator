@@ -17,6 +17,24 @@ NEGATIVO = re.compile(
     r"\btaco\b|piso cer[aâ]mico antigo|piso (em |de )?cer[aâ]mica|cer[aâ]mica nos quartos", re.I)
 
 
+def custo_mensal(im: dict, cfg: dict) -> int | None:
+    """Quanto sai por mês de verdade.
+
+    QuintoAndar: o total do site já soma aluguel, condomínio, IPTU, seguro incêndio e taxa de serviço,
+    e não exige fiador nem seguro fiança. Imobiliárias: aluguel + condomínio + IPTU + seguro fiança
+    (% do aluguel) + seguro incêndio estimado.
+    """
+    aluguel = im.get("aluguel")
+    if not aluguel:
+        return None
+    if im.get("fonte") == "quintoandar" and im.get("custo_total"):
+        return im["custo_total"]
+    c = cfg.get("custos", {})
+    return (aluguel + (im.get("condominio_iptu") or 0)
+            + round(aluguel * c.get("seguro_fianca_pct", 10) / 100)
+            + c.get("seguro_incendio_estimado", 50))
+
+
 def _bairro_status(bairro: str, cfg_busca: dict) -> str:
     b = normalizar(bairro)
     if not b:
@@ -64,9 +82,9 @@ def avaliar(im: dict, cfg: dict) -> tuple[bool, int, list[str]]:
         reprova(f"aluguel R$ {aluguel} acima do máximo")
     if aluguel and aluguel < busca.get("aluguel_min", 0):
         reprova(f"aluguel R$ {aluguel} suspeito de baixo")
-    total = im.get("custo_total") or (aluguel + (im.get("condominio_iptu") or 0))
+    total = custo_mensal(im, cfg)
     if total and total > busca.get("custo_total_max", 10**9):
-        reprova(f"custo total R$ {total} acima do máximo")
+        reprova(f"custo mensal R$ {total} acima do máximo")
 
     q = im.get("quartos")
     if q is not None and q < busca.get("quartos_min", 0):
